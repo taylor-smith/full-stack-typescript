@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:server": "cd src/server && tsc",
+    "start": "node private/server/index.js"
   },
   "author": "twsmith89@gmail.com",
   "license": "ISC",
