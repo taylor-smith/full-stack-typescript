@@ -3,6 +3,8 @@
         "target": "es6",
         "module": "commonJS",
         "outDir": "../../private",
-        "rootDir": "../"
+        "rootDir": "../",
+        "inlineSourceMap": true,
+        "sourceRoot": "../"
     }
 }
