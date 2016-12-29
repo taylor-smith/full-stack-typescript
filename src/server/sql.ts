@@ -49,6 +49,18 @@ export default class Sql {
        });
    }
 
+   get(sql: string, params?: {[key: string]: string | number}) {
+       return new Promise<any[]>((resolve, reject) => {
+           if(this.db === null) {
+               reject(new Error('db is null'));
+               return;
+           }
+            this.db.get(sql, params || {}, (err, row) => {
+                err ? reject(err) : resolve(row);
+            })
+       })
+   }
+
    close() {
        return new Promise((resolve, reject) => {
            if (this.db === null || !this.isOpen) {

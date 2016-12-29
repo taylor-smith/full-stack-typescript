@@ -2,16 +2,20 @@ console.log(`Node version: ${process.env.NODE_ENV}`); // NODE_ENV isn't correct,
 
 import express from 'express';
 import Sql from './sql';
+import * as models from '../common/models';
 
 const app = express();
 
 app.use(express.static(process.env.PUBLIC_DIR));
 
+
 app.get('/presentations', async (req, res) => {
     const sql = new Sql();
     try {
         await sql.open();
-        const presentations = await sql.all('SELECT * FROM presentations');
+        const rawPresentations = await sql.all('SELECT * FROM presentations');
+        const presentations = models.deserializePresentations(rawPresentations);
+        const serializedPresentations = models.serializePresentations(presentations);
         res.send(presentations);
     } catch (err) {
         res.status(500).send(JSON.stringify(err));
@@ -20,10 +24,52 @@ app.get('/presentations', async (req, res) => {
     }
 });
 
-app.get('/presenters', (req, res) => {
-
+app.get('/presenters', async (req, res) => {
+    const sql = new Sql();
+    try {
+        await sql.open();
+        const rawPresenters = await sql.all('SELECT * FROM presenters');
+        const presenters = models.deserializePresenters(rawPresenters);
+        const serializedPresenters = models.serializePresenters(presenters);
+        res.send(presenters);
+    } catch (err) {
+        res.status(500).send(JSON.stringify(err));
+    } finally {
+        sql.close()
+    } 
 });
 
+app.get('/presentation/:id', async (req, res) => {
+    const sql = new Sql();
+    try {
+        await sql.open();
+        const rawPresentation = await sql.get('SELECT * FROM presentations WHERE id=$id', { $id: req.params.id });
+        console.log(rawPresentation);
+        const presentation = models.deserializePresentation(rawPresentation);
+        console.log(presentation);
+        const serializedpresentation = models.serializePresentation(presentation);
+        res.send(presentation);
+    } catch (err) {
+        res.status(500).send(JSON.stringify(err));
+    } finally {
+        sql.close()
+    }
+});
+
+app.get('/presenter/:id', async (req, res) => {
+    const sql = new Sql();
+    try {
+        await sql.open();
+        const rawPresenter = await sql.get('SELECT * FROM presenters WHERE id=$id', { $id : req.params.id });
+        const presenter = models.deserializePresenter(rawPresenter);
+        const serializedPresenter = models.serializePresenter(presenter);
+        res.send(presenter);
+    } catch (err) {
+        res.status(500).send(JSON.stringify(err));
+    } finally {
+        sql.close()
+    } 
+});
 app.get('/*', (req, res) => {
     res.send(`
         <!DOCTYPE html>
